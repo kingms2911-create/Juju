@@ -1,20 +1,29 @@
-import { useState } from "react";
-import { WebinarProvider, useWebinar } from "./WebinarContext";
-import Navbar from "./Navbar";
-import HostStudio from "./HostStudio";
-import AttendeeRoom from "./AttendeeRoom";
+import React, { useState } from 'react';
+import { WebinarProvider } from './WebinarContext';
+import Navbar from './Navbar';
+import HostStudio from './HostStudio';
+import AttendeeRoom from './AttendeeRoom';
+import BrandingSettings from './BrandingSettings';
 
-function Shell() {
-  const [tab, setTab] = useState("host");
-  const { status, leave } = useWebinar();
-  const switchTab = async (t) => {
-    if (t !== tab && status !== "offline") await leave();
-    setTab(t);
-  };
+function MainApp() {
+  const [activeTab, setActiveTab] = useState('attendee');
+  const [showBranding, setShowBranding] = useState(false);
+
   return (
-    <div className="app">
-      <Navbar tab={tab} setTab={switchTab} />
-      {tab === "host" ? <HostStudio /> : <AttendeeRoom />}
+    <div className="min-h-screen bg-slate-900 text-white flex flex-col">
+      <Navbar 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        onOpenBranding={() => setShowBranding(true)} 
+      />
+
+      <main className="flex-1 container mx-auto p-4 md:p-6">
+        {activeTab === 'host' ? <HostStudio /> : <AttendeeRoom />}
+      </main>
+
+      {showBranding && (
+        <BrandingSettings onClose={() => setShowBranding(false)} />
+      )}
     </div>
   );
 }
@@ -22,7 +31,7 @@ function Shell() {
 export default function App() {
   return (
     <WebinarProvider>
-      <Shell />
+      <MainApp />
     </WebinarProvider>
   );
 }
