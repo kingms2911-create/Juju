@@ -1,5 +1,10 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { AgoraRTC, createAgoraClient, AGORA_APP_ID, AGORA_CHANNEL, AGORA_TOKEN } from "./agoraConfig";
+import AgoraRTC from "agora-rtc-sdk-ng";
+import { AGORA_APP_ID as CONFIG_APP_ID, AGORA_CHANNEL as CONFIG_CHANNEL, AGORA_TOKEN as CONFIG_TOKEN } from "./agoraConfig";
+
+const AGORA_APP_ID = CONFIG_APP_ID || "6bcd6067bc3e4f79b398496b8536eca0";
+const AGORA_CHANNEL = CONFIG_CHANNEL || "main-webinar";
+const AGORA_TOKEN = CONFIG_TOKEN || null;
 
 const Ctx = createContext(null);
 export const useWebinar = () => useContext(Ctx);
@@ -19,13 +24,13 @@ export function WebinarProvider({ children }) {
   const [brand, setBrand] = useState(DEFAULT_BRAND);
   const [messages, setMessages] = useState([
     { id: 1, user: "Rahul", text: "Namaste sir, audio clear hai!" },
-    { id: 2, user: "Priya", text: "Very useful session \ud83d\udc4d" },
+    { id: 2, user: "Priya", text: "Very useful session 👍" },
     { id: 3, user: "Amit", text: "Recording milegi kya?" },
   ]);
 
   const getClient = () => {
     if (!clientRef.current) {
-      const c = createAgoraClient();
+      const c = AgoraRTC.createClient({ mode: "live", codec: "vp8" });
       c.on("user-published", async (user, type) => {
         await c.subscribe(user, type);
         if (type === "video") setRemoteUser(user);
@@ -89,6 +94,7 @@ export function WebinarProvider({ children }) {
     await tracks.mic.setEnabled(!micOn);
     setMicOn(!micOn);
   };
+
   const toggleCam = async () => {
     if (!tracks.cam) return;
     await tracks.cam.setEnabled(!camOn);
@@ -116,5 +122,6 @@ export function WebinarProvider({ children }) {
     startHost, joinAsAttendee, leave, toggleMic, toggleCam, sendMessage,
     setShowCta, setBrand, resetBrand: () => setBrand(DEFAULT_BRAND),
   };
+
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
